@@ -4674,6 +4674,7 @@ fn run_ritual_model(
     let workspace = verified_workspace_root(cfg)?;
     let mut schema_file = None;
     let mut command = Command::new(&binary);
+    platform::hide_console(&mut command);
     if codex {
         command.args(["exec", "--sandbox", "read-only", "--skip-git-repo-check", "--ephemeral", "--json", "--config", "approval_policy=\"never\""]);
         configure_codex_profile(&mut command, profile);
@@ -4825,7 +4826,10 @@ fn resource_path(app: &AppHandle, name: &str) -> Result<PathBuf, String> {
 /// siempre `ESPRIT_CONFIG` con la ruta absoluta de la configuración cargada.
 fn bridge_command(cfg: &Resolved, script: &Path) -> Command {
     let mut command = Command::new(cfg.python3());
-    command.arg(script).env("ESPRIT_CONFIG", &cfg.path);
+    // Windows: sin PYTHONUTF8 la salida redirigida usa la página ANSI (cp1252)
+    // y serde_json rechaza tildes y eñes.
+    command.arg(script).env("ESPRIT_CONFIG", &cfg.path).env("PYTHONUTF8", "1").env("PYTHONIOENCODING", "utf-8");
+    platform::hide_console(&mut command);
     command
 }
 

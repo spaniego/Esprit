@@ -319,7 +319,7 @@
           }
         },
         "mattermost": {
-          "description": "La contraseña o el token viven en el llavero de macOS: security add-generic-password -s <keychain_service> -a <username> -w",
+          "description": "La contraseña o el token viven en el llavero de macOS (security add-generic-password -s <keychain_service> -a <username> -w) o, en Windows, en el Administrador de credenciales (python scripts/windows-mattermost.py)",
           "type": "object",
           "additionalProperties": false,
           "required": [

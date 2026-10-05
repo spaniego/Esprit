@@ -327,9 +327,8 @@ pub struct Overview {
 
 fn random_id() -> Result<String> {
     let mut bytes = [0u8; 16];
-    fs::File::open("/dev/urandom")
-        .and_then(|mut file| file.read_exact(&mut bytes))
-        .map_err(|_| storage_error())?;
+    // RNG del sistema: /dev/urandom no existe en Windows.
+    getrandom::fill(&mut bytes).map_err(|_| storage_error())?;
     Ok(bytes.iter().map(|byte| format!("{byte:02x}")).collect())
 }
 /// Contexto guardado: `general` o un slug con el formato de proyecto. La
@@ -1069,6 +1068,7 @@ fn command_for(
     profile: CodexProfile,
 ) -> Command {
     let mut command = Command::new(binary);
+    crate::platform::hide_console(&mut command);
     if engine == ChatEngine::Codex {
         command.arg("exec");
         if thread_id.is_some() {
@@ -1534,6 +1534,14 @@ pub async fn ask_codex(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn random_ids_use_the_portable_system_rng() {
+        let (first, second) = (random_id().unwrap(), random_id().unwrap());
+        assert_eq!(first.len(), 32);
+        assert!(first.bytes().all(|byte| byte.is_ascii_hexdigit()));
+        assert_ne!(first, second);
+    }
 
     #[test]
     fn catalogue_is_the_profile_validator_for_every_model() {

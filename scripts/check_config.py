@@ -149,8 +149,11 @@ def check_config(cfg: dict, r: Report) -> Path | None:
 
     tz = cfg.get("time_zone")
     if isinstance(tz, str) and TZ.match(tz):
-        if not Path("/usr/share/zoneinfo", tz).is_file():
-            r.warn(f"time_zone: «{tz}» no aparece en /usr/share/zoneinfo; comprueba que sea una zona IANA real.")
+        try:
+            from zoneinfo import ZoneInfo
+            ZoneInfo(tz)  # en Windows necesita el paquete tzdata
+        except Exception:
+            r.warn(f"time_zone: «{tz}» no es una zona IANA conocida (en Windows, instala tzdata con pip).")
     elif "time_zone" in cfg:
         r.error("time_zone: debe ser una zona IANA como Europe/Madrid.")
 

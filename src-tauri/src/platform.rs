@@ -21,6 +21,17 @@ pub fn signal_process_tree(pid: i32, signal: i32) {
     }
 }
 
+/// En Windows, los hijos de consola (python.exe, claude.exe, codex.exe) abren
+/// una ventana visible si la app GUI no pide CREATE_NO_WINDOW; sus propios
+/// hijos heredan esa consola oculta.
+pub fn hide_console(command: &mut Command) -> &mut Command {
+    #[cfg(windows)] {
+        use std::os::windows::process::CommandExt;
+        command.creation_flags(0x08000000);
+    }
+    command
+}
+
 #[cfg(windows)]
 fn powershell(script: &str) -> Command {
     use std::os::windows::process::CommandExt;

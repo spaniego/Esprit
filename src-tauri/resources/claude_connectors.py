@@ -17,8 +17,11 @@ import subprocess
 import sys
 import tempfile
 
-MAIL_READS = {'gmail_search_messages', 'gmail_read_message', 'gmail_read_thread', 'gmail_batch_read_messages', 'search_messages', 'get_message', 'get_thread', 'list_messages'}
-CALENDAR_READS = {'gcal_list_calendars', 'gcal_list_events', 'gcal_get_event', 'gcal_search_events', 'list_calendars', 'list_events', 'get_event'}
+# Nombres antiguos (gmail_*/gcal_*) y los del conector actual de claude.ai
+# (gmailmcp.googleapis.com: search_threads, get_thread, get_message, list_labels).
+MAIL_READS = {'gmail_search_messages', 'gmail_read_message', 'gmail_read_thread', 'gmail_batch_read_messages', 'search_messages', 'search_threads', 'get_message', 'get_thread', 'list_messages', 'list_labels'}
+MAIL_SEARCHES = {'gmail_search_messages', 'search_messages', 'search_threads', 'list_messages'}
+CALENDAR_READS = {'gcal_list_calendars', 'gcal_list_events', 'gcal_get_event', 'gcal_search_events', 'list_calendars', 'list_events', 'get_event', 'search_events'}
 MAX_BYTES = 8 * 1024 * 1024
 
 def source_for_tool(name):
@@ -42,10 +45,13 @@ def guard(event, allowed, scope=None):
     args=event.get('tool_input',{})
     if not isinstance(args,dict):return False
     tool=name.rsplit('__',1)[-1]
-    if tool in {'gmail_search_messages','search_messages','list_messages'}:
+    if tool in MAIL_SEARCHES:
         return args.get('query',args.get('q')) == scope.get('gmail_query')
     if source_for_tool(name)=='calendar' and tool not in {'gcal_list_calendars','list_calendars'}:
-        calendar=args.get('calendar_id',args.get('calendarId'))
+        # calendarId es opcional en el conector actual y equivale a 'primary';
+        # search_events solo busca en el calendario principal.
+        calendar=args.get('calendar_id',args.get('calendarId')) or 'primary'
+        if tool in {'search_events','gcal_search_events'} and calendar!='primary': return False
         return calendar in scope.get('calendar_ids',[])
     return True
 

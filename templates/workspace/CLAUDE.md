@@ -18,7 +18,7 @@ Antes de trabajar en un proyecto, lee su `STATE.md` y, si existen, su
   español que Esprit lee (Foco, Radar de proyectos, No olvidar, Esperando a…).
   **Lo actualiza el Logout de Esprit. No lo edites a mano salvo que te lo pida
   expresamente**; si te lo pido, conserva exactamente el formato descrito en
-  `{{SOURCE_REPO}}/docs/ESTADO_GLOBAL.md` y enséñame el cambio antes de guardarlo.
+  `{{SOURCE_REPO}}/docs/GLOBAL_STATE.md` y enséñame el cambio antes de guardarlo.
 - `Esprit/perfil-investigacion.md` — lo que el Radar de lectura considera
   relevante. Puedes ayudarme a mejorarlo cuando cambien mis prioridades.
 - `Esprit/login-history.json`, `Esprit/logout-history.json` y

@@ -51,6 +51,8 @@ jobs:
           cargo test --manifest-path src-tauri/Cargo.toml --lib chat_history::tests
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           cargo test --manifest-path src-tauri/Cargo.toml --lib research::tests
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          cargo test --manifest-path src-tauri/Cargo.toml --lib chat::tests::random_ids_use_the_portable_system_rng
       - name: Build Windows installer
         run: npm run app:build:windows
       - name: Isolated configuration smoke test

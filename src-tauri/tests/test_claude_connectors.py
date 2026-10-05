@@ -20,6 +20,18 @@ class ConnectorTests(unittest.TestCase):
         self.assertFalse(c.guard({'tool_name':MAIL,'tool_input':{'query':'in:anywhere'}},[MAIL],CONFIG))
         self.assertFalse(c.guard({'tool_name':CAL,'tool_input':{'calendar_id':'not-chosen'}},[CAL],CONFIG))
         self.assertTrue(c.guard({'tool_name':CAL,'tool_input':{'calendar_id':'primary'}},[CAL],CONFIG))
+    def test_current_claude_ai_connector_names(self):
+        threads='mcp__claude_ai_Gmail__search_threads';events_='mcp__claude_ai_Google_Calendar__list_events';search='mcp__claude_ai_Google_Calendar__search_events'
+        for name in [threads,'mcp__claude_ai_Gmail__get_thread','mcp__claude_ai_Gmail__list_labels']:self.assertEqual(c.source_for_tool(name),'mail')
+        for name in ['mcp__claude_ai_Gmail__send_message','mcp__claude_ai_Gmail__create_draft','mcp__claude_ai_Gmail__label_thread','mcp__claude_ai_Google_Calendar__create_event']:self.assertIsNone(c.source_for_tool(name))
+        self.assertTrue(c.guard({'tool_name':threads,'tool_input':{'query':CONFIG['gmail_query'],'pageSize':40}},[threads],CONFIG))
+        self.assertFalse(c.guard({'tool_name':threads,'tool_input':{}},[threads],CONFIG))
+        self.assertFalse(c.guard({'tool_name':threads,'tool_input':{'query':'in:anywhere'}},[threads],CONFIG))
+        # calendarId omitido = primary
+        self.assertTrue(c.guard({'tool_name':events_,'tool_input':{}},[events_],CONFIG))
+        self.assertTrue(c.guard({'tool_name':events_,'tool_input':{'calendarId':'primary'}},[events_],CONFIG))
+        self.assertFalse(c.guard({'tool_name':events_,'tool_input':{}},[events_],dict(CONFIG,calendar_ids=['otro@group.calendar.google.com'])))
+        self.assertTrue(c.guard({'tool_name':search,'tool_input':{'query':'seminario'}},[search],CONFIG))
     def test_no_tool_call_never_means_empty_inbox(self):
         result=c.project_events(events()[2:],CONFIG)
         self.assertEqual(result['mail']['status'],'unavailable')

@@ -8,8 +8,8 @@ pub fn source_for_tool(name: &str) -> Option<&'static str> {
     let (server, tool) = name.rsplit_once("__")?;
     if !server.starts_with("mcp__") { return None; }
     let server = server.to_ascii_lowercase();
-    if server.contains("gmail") && matches!(tool, "gmail_search_messages" | "gmail_read_message" | "gmail_read_thread" | "gmail_batch_read_messages" | "search_messages" | "get_message" | "get_thread" | "list_messages") { return Some("mail"); }
-    if (server.contains("google_calendar") || server.contains("gcal")) && matches!(tool, "gcal_list_calendars" | "gcal_list_events" | "gcal_get_event" | "gcal_search_events" | "list_calendars" | "list_events" | "get_event") { return Some("calendar"); }
+    if server.contains("gmail") && matches!(tool, "gmail_search_messages" | "gmail_read_message" | "gmail_read_thread" | "gmail_batch_read_messages" | "search_messages" | "search_threads" | "get_message" | "get_thread" | "list_messages" | "list_labels") { return Some("mail"); }
+    if (server.contains("google_calendar") || server.contains("gcal")) && matches!(tool, "gcal_list_calendars" | "gcal_list_events" | "gcal_get_event" | "gcal_search_events" | "list_calendars" | "list_events" | "get_event" | "search_events") { return Some("calendar"); }
     None
 }
 
@@ -51,6 +51,10 @@ pub fn capture(cfg: &Resolved, app: &AppHandle, profile: CodexProfile, action: &
     #[test] fn connector_allowlist_rejects_mutations_and_wildcards() {
         assert_eq!(source_for_tool("mcp__claude_ai_Gmail__gmail_search_messages"),Some("mail"));
         assert_eq!(source_for_tool("mcp__claude_ai_Google_Calendar__gcal_list_events"),Some("calendar"));
+        // Conector actual de claude.ai (gmailmcp.googleapis.com / Calendar).
+        for name in ["mcp__claude_ai_Gmail__search_threads","mcp__claude_ai_Gmail__get_thread","mcp__claude_ai_Gmail__list_labels"] { assert_eq!(source_for_tool(name),Some("mail")); }
+        for name in ["mcp__claude_ai_Google_Calendar__list_events","mcp__claude_ai_Google_Calendar__search_events"] { assert_eq!(source_for_tool(name),Some("calendar")); }
+        for name in ["mcp__claude_ai_Gmail__send_message","mcp__claude_ai_Gmail__create_draft","mcp__claude_ai_Gmail__label_thread","mcp__claude_ai_Google_Calendar__create_event","mcp__claude_ai_Google_Calendar__respond_to_event"] { assert!(source_for_tool(name).is_none()); }
         for name in ["mcp__claude_ai_Gmail__gmail_send_message","mcp__claude_ai_Google_Calendar__gcal_create_event","mcp__Gmail__*","Bash","mcp__other__get_message"] { assert!(source_for_tool(name).is_none()); }
     }
 }
