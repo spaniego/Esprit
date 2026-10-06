@@ -48,9 +48,7 @@
 }
 
 html { font-size: 100%; }
-html[data-text-size='small'] { font-size: 93.75%; }
-html[data-text-size='comfortable'] { font-size: 100%; }
-html[data-text-size='large'] { font-size: 109.375%; }
+/* El tamaño se aplica con el zoom nativo del WebView (set_ui_zoom). */
 
 .app-shell[data-theme='dark'] {
   /* Resaltado de sintaxis, tema oscuro: los mismos papeles, aclarados y

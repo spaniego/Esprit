@@ -55,6 +55,15 @@ class ConnectorTests(unittest.TestCase):
         self.assertEqual(args[args.index('--permission-mode')+1],'dontAsk')
         settings=json.loads(args[args.index('--settings')+1]);self.assertIn('PreToolUse',settings['hooks'])
         self.assertNotIn('--dangerously-skip-permissions',args)
+    def test_capture_waits_for_claude_ai_connectors(self):
+        seen={}
+        def fake(command,prompt,cwd,env,timeout=240):
+            seen.update(env=env,prompt=prompt);return []
+        original=c.run_bounded;c.run_bounded=fake
+        try:c.capture({'modules':{'claude_connectors':CONFIG},'tools':{'claude':'claude'}},'sonnet','high','login')
+        finally:c.run_bounded=original
+        self.assertEqual(seen['env']['MCP_CONNECTION_NONBLOCKING'],'false')
+        self.assertIn('select:',seen['prompt'])
     def test_hook_exec_form_has_no_shell(self):
         args=c.build_command('claude',CONFIG,'sonnet','high');settings=json.loads(args[args.index('--settings')+1])
         hook=settings['hooks']['PreToolUse'][0]['hooks'][0]

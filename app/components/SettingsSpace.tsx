@@ -51,6 +51,10 @@ export const isAppearanceTextSize = (value: string | null): value is AppearanceT
   value === 'small' || value === 'comfortable' || value === 'large'
 );
 
+// Zoom del WebView: escala texto, cajas e iconos a la vez (gran parte del CSS
+// usa px fijos). «small» conserva el aspecto original.
+export const appearanceZoom: Record<AppearanceTextSize, number> = { small: 1, comfortable: 1.2, large: 1.35 };
+
 type SettingsSpaceProps = {
   theme: 'light' | 'dark';
   palette: AppearancePalette;
@@ -81,8 +85,8 @@ type SettingsSpaceProps = {
 };
 
 const textSizes: Array<{ id: AppearanceTextSize; label: string; sample: string }> = [
-  { id: 'small', label: 'Pequeño', sample: 'Aa' },
-  { id: 'comfortable', label: 'Normal', sample: 'Aa' },
+  { id: 'small', label: 'Compacto', sample: 'Aa' },
+  { id: 'comfortable', label: 'Cómodo', sample: 'Aa' },
   { id: 'large', label: 'Grande', sample: 'Aa' },
 ];
 
@@ -136,8 +140,8 @@ export default function SettingsSpace({
         </fieldset>
 
         <fieldset className="settings-control-group">
-          <legend>TAMAÑO DEL TEXTO</legend>
-          <div className="settings-text-sizes" role="group" aria-label="Tamaño del texto">
+          <legend>TAMAÑO DE LA INTERFAZ</legend>
+          <div className="settings-text-sizes" role="group" aria-label="Tamaño de la interfaz">
             {textSizes.map((option) => (
               <button className={textSize === option.id ? `active ${option.id}` : option.id} onClick={() => onTextSizeChange(option.id)} type="button" aria-pressed={textSize === option.id} key={option.id}>
                 <b>{option.sample}</b><span>{option.label}</span>

@@ -4483,6 +4483,16 @@ fn arm_esprit_close_guard(window: tauri::WebviewWindow) -> Result<(), String> {
 }
 
 #[tauri::command]
+fn set_ui_zoom(window: tauri::WebviewWindow, scale: f64) -> Result<(), String> {
+    if !(0.8..=1.6).contains(&scale) {
+        return Err("Escala de interfaz no válida".into());
+    }
+    window
+        .set_zoom(scale)
+        .map_err(|error| format!("No se pudo ajustar el tamaño de la interfaz: {error}"))
+}
+
+#[tauri::command]
 fn close_esprit_window(window: tauri::WebviewWindow) -> Result<(), String> {
     // Only reached after the frontend has resolved the draft guard and flushed
     // history (or the user explicitly chose to discard after a save error).
@@ -8082,6 +8092,7 @@ pub fn run() {
             calendar_overview,
             calendar_create_event,
             close_esprit_window,
+            set_ui_zoom,
             arm_esprit_close_guard,
             cluster_list,
             cluster_read_file,

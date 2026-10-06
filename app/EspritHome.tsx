@@ -26,6 +26,7 @@ import SettingsSpace, {
   AppearanceTextSize,
   isAppearancePalette,
   isAppearanceTextSize,
+  appearanceZoom,
 } from './components/SettingsSpace';
 import { useResizableSplit } from './components/useResizableSplit';
 import { startVisiblePolling } from './visiblePolling';
@@ -134,6 +135,11 @@ type ProjectEditorStatus = { unsaved: boolean; busy: boolean };
 
 const isThemeMode = (value: string | null): value is ThemeMode => value === 'light' || value === 'dark';
 const isChatEngine = (value: string | null): value is ChatEngine => value === 'codex' || value === 'claude';
+const applyInterfaceSize = (value: AppearanceTextSize) => {
+  document.documentElement.dataset.textSize = value;
+  // Fuera de Tauri (vista previa web) no hay zoom nativo: se ignora.
+  void invoke('set_ui_zoom', { scale: appearanceZoom[value] }).catch(() => undefined);
+};
 const isCodexModel = (value: string | null): value is CodexModel => (
   value === 'gpt-6-astra' || value === 'gpt-6-sol' || value === 'gpt-6-luna'
 );
@@ -662,7 +668,7 @@ export default function EspritHome() {
       setPalette(isAppearancePalette(storedPalette) ? storedPalette : mountDefaults.palette);
       setTextSize(nextTextSize);
       setShowHiddenFiles(storedShowHiddenFiles === '1');
-      document.documentElement.dataset.textSize = nextTextSize;
+      applyInterfaceSize(nextTextSize);
       setChatEngine(isChatEngine(storedChatEngine) && engineAvailable(storedChatEngine) ? storedChatEngine : mountDefaults.engine);
       // A retired Codex model is replaced by its successor once, then remembered.
       const restoredCodexModel = currentAgentModel(storedCodexModel ?? '');
@@ -715,7 +721,7 @@ export default function EspritHome() {
 
   const updateTextSize = (value: AppearanceTextSize) => {
     setTextSize(value);
-    document.documentElement.dataset.textSize = value;
+    applyInterfaceSize(value);
     window.localStorage.setItem('esprit-text-size', value);
   };
 
